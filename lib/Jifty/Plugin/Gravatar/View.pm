@@ -11,17 +11,25 @@ template '/gravatar' => sub {
     my $gravatar_id = gravatar_id($email);
 
     div { { class is 'gravatar-image-wrapper' };
-        img { { id is 'g-i-' . $gravatar_id, class is 'gravatar-image', src is '/=/gravatar/' . $gravatar_id }; };
+        # check config 
+        my $config = Jifty->find_plugin('Jifty::Plugin::Gravatar');
+        if( $config->{Cache} ) {
+            img { { id is 'g-i-' . $gravatar_id, class is 'gravatar-image', src is '/=/gravatar/' . $gravatar_id }; };
+        }
+        else {
+            div { { class is 'gravatar-image-wrapper' };
+                img { { id is 'g-i-' . $gravatar_id, class is 'gravatar-image', src is $gravatar_url }; };
+            };
+        }
     };
 
-#    div { { class is 'gravatar-image-wrapper' };
-#        img { { id is 'g-i-' . $gravatar_id, class is 'gravatar-image', src is $gravatar_url }; };
-#    };
 };
 
 template '/=/gravatar/image' => sub {
+    my $config = Jifty->find_plugin('Jifty::Plugin::Gravatar');
     Jifty->handler->apache->content_type("image/jpeg");
-    Jifty->handler->apache->header_out(Expires =>  HTTP::Date::time2str(time() + 3600 ));  # Expire in a year
+    Jifty->handler->apache->header_out(Expires =>  HTTP::Date::time2str(time() + ( $config->{Cache} || 3600 ) )); 
+    # XXX: use cache::file
     my $id = get('id');
     my $gravatar_url = gravatar_url( id => $id );
     use LWP::Simple qw();
