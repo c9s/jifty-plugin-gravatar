@@ -24,6 +24,17 @@ add options to config.yml
         CacheFileExpire: 10
         CacheRoot: /tmp/gravatar
 
+to use gravatar icon in your template:
+
+    package MyApp::View;
+    use Jifty::View::Declare -base;
+
+    template 'index.html' => page { } content {
+
+        show '/gravatar' => 'email@host.com';
+
+    };
+
 =head1 USAGE
 
 Add the following to your site_config.yml
